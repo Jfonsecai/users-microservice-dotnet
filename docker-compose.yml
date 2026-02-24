@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-users
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Pass123"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  users-api:
+    build:
+      context: .
+      dockerfile: UsersService.Api/Dockerfile
+    container_name: users-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=UsersDb;User Id=sa;Password=YourStrong!Pass123;TrustServerCertificate=True;"
+
+volumes:
+  sql_data:
